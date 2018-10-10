@@ -411,7 +411,7 @@ char *strupr(char *s)
         FILE * pSourceFile;
 
         if ( ! ( pSourceFile = fopen ( g_pstrSourceFilename, "r" ) ) )
-            ExitOnError ( "Could not open source file for input" );
+            ExitOnError ( (char*)"Could not open source file for input" );
 
         // ---- Load the source code
 
@@ -460,8 +460,8 @@ char *strupr(char *s)
         // Add two temporary variables for evaluating expressions
         // 为表达式求值添加两个临时变量
 
-        g_iTempVar0SymbolIndex = AddSymbol ( TEMP_VAR_0, 1, SCOPE_GLOBAL, SYMBOL_TYPE_VAR );
-        g_iTempVar1SymbolIndex = AddSymbol ( TEMP_VAR_1, 1, SCOPE_GLOBAL, SYMBOL_TYPE_VAR );
+        g_iTempVar0SymbolIndex = AddSymbol ( (char*)TEMP_VAR_0, 1, SCOPE_GLOBAL, SYMBOL_TYPE_VAR );
+        g_iTempVar1SymbolIndex = AddSymbol ( (char*)TEMP_VAR_1, 1, SCOPE_GLOBAL, SYMBOL_TYPE_VAR );
         
         // Parse the source file to create an I-code representation
         // 解析源码文件并创建中间代码表示
