@@ -1948,7 +1948,7 @@ char *strupr(char *str){
 
         // Is it _RetVal?
 
-        if ( strcmp ( g_Lexer.pstrCurrLexeme, "_RETVAL" ) == 0 )
+        if ( strcmp ( g_Lexer.pstrCurrLexeme, "_RetVal" ) == 0 )
             g_Lexer.CurrToken = TOKEN_TYPE_REG_RETVAL;
 
 		// Is it an instruction?
