@@ -1,0 +1,31 @@
+/*
+	Rectangle drawing
+*/
+
+// Import our host API functions
+
+host PrintString ();
+host PrintNewline ();
+
+// Make the size of the rectangle global
+
+func _Main ()
+{
+	var X;
+    var Y;
+	
+    X = 0;
+    Y = 0;
+	
+	while ( X < 100 )
+	{
+        while (Y < 10) {
+		
+            PrintString ( "*" );
+		    PrintNewline ();
+
+            Y += 1;
+        }
+        X += 1;
+	}
+}

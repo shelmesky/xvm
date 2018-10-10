@@ -1,0 +1,91 @@
+; TEST1.XASM
+
+; Source File: TEST1.XSS
+; XSC Version: 0.8
+;   Timestamp: Sat Sep 29 19:44:52 2018
+
+; ---- Directives -----------------------------------------------------------------------------
+
+; ---- Global Variables -----------------------------------------------------------------------
+
+	Var _T0
+	Var _T1
+
+; ---- Functions ------------------------------------------------------------------------------
+
+; ---- Main -----------------------------------------------------------------------------------
+
+	Func _Main
+	{
+		Var X
+		Var Y
+
+		;     X = 0;
+
+		Push		0
+		Pop		_T0
+		Mov		X, _T0
+
+		;     Y = 0;
+
+		Push		0
+		Pop		_T0
+		Mov		Y, _T0
+
+		; 	while ( X < 100 )
+
+	_L0:
+		Push		X
+		Push		100
+		Pop		_T1
+		Pop		_T0
+		JL		_T0, _T1, _L2
+		Push		0
+		Jmp		_L3
+	_L2:
+		Push		1
+	_L3:
+		Pop		_T0
+		JE		_T0, 0, _L1
+
+		;         while (Y < 10) {
+
+	_L4:
+		Push		Y
+		Push		10
+		Pop		_T1
+		Pop		_T0
+		JL		_T0, _T1, _L6
+		Push		0
+		Jmp		_L7
+	_L6:
+		Push		1
+	_L7:
+		Pop		_T0
+		JE		_T0, 0, _L5
+
+		;             PrintString ( "*" );
+
+		Push		"*"
+		CallHost	PrintString
+
+		; 		    PrintNewline ();
+
+		CallHost	PrintNewline
+
+		;             Y += 1;
+
+		Push		1
+		Pop		_T0
+		Add		Y, _T0
+		Jmp		_L4
+	_L5:
+
+		;         X += 1;
+
+		Push		1
+		Pop		_T0
+		Add		X, _T0
+		Jmp		_L0
+	_L1:
+	}
