@@ -3810,7 +3810,7 @@ char *strupr(char *str){
 
 // ---- Main ----------------------------------------------------------------------------------
 
-    main ( int argc, char * argv [] )
+    int main ( int argc, char * argv [] )
     {
         // Print the logo
 
