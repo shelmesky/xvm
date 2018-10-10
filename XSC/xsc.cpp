@@ -646,7 +646,7 @@ char *strupr(char *s)
 
 // ---- Main ----------------------------------------------------------------------------------
 
-    main ( int argc, char * argv [] )
+    int main ( int argc, char * argv [] )
     {
         // Print the logo
         // 打印LOGO
