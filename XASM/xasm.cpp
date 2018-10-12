@@ -2719,8 +2719,10 @@ char *strupr(char *str){
 
 					// _Main () can't accept parameters, so make sure we aren't in it
 
+					/*
 					if ( strcmp ( pstrCurrFuncName, MAIN_FUNC_NAME ) == 0 )
 						ExitOnCodeError ( ERROR_MSSG_MAIN_PARAM );
+                    */
 
                     // The parameter's identifier should follow
 

@@ -648,11 +648,13 @@
             // cannot accept paraemters
             // 如果这个函数被定义个_Main()，则报错，因为_Main()函数没有参数
 
+            /*
             if ( g_ScriptHeader.iIsMainFuncPresent &&
                  g_ScriptHeader.iMainFuncIndex == iFuncIndex )
             {
                 ExitOnCodeError ( "_Main () cannot accept parameters" );
             }
+             */
 
             // Start the parameter count at zero
             // 参数数量计数器
