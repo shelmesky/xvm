@@ -22,7 +22,7 @@
 // ---- Include Files -------------------------------------------------------------------------
 
     #include <stdio.h>
-    #include <conio.h>
+    //#include <conio.h>
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -40,6 +40,7 @@
     *
     *   Prints a string to the console.
     */
+/*
 int kbhit(void)
 {
 	struct termios oldt, newt;
@@ -61,6 +62,7 @@ int kbhit(void)
 	}
 	return 0;
 }
+*/
 
     void HAPI_PrintString ( int iThreadIndex )
     {
@@ -203,7 +205,7 @@ int kbhit(void)
 
         // Run the script until a key is pressed
 
-        while ( ! kbhit () )
+        //while ( ! kbhit () )
             XS_RunScripts ( 200 );
 
         // Free resources and perform general cleanup
