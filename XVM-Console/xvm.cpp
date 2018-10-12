@@ -985,7 +985,10 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
         // compensate for the function index that usually sits on top of stack frames and
         // causes indices to start from -2)
 
-        PushFrame ( iThreadIndex, g_Scripts [ iThreadIndex ].FuncTable.pFuncs [ iMainFuncIndex ].iLocalDataSize + 1 );
+        XS_PassStringParam(iThreadIndex, (char *)"This is Action");
+        XS_PassStringParam(iThreadIndex, (char *)"This is Address");
+
+        PushFrame ( iThreadIndex, g_Scripts [ iThreadIndex ].FuncTable.pFuncs [ iMainFuncIndex ].iLocalDataSize + 2 );
 	}
 
 	/******************************************************************************************
@@ -1689,7 +1692,7 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
 
                     // Check for the presence of a stack base marker
 
-                    if ( FuncIndex.iType = OP_TYPE_STACK_BASE_MARKER )
+                    if ( FuncIndex.iType == OP_TYPE_STACK_BASE_MARKER )
                         iExitExecLoop = TRUE;
 
                     // Get the previous function index
