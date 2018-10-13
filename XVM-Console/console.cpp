@@ -117,7 +117,7 @@ int kbhit(void)
 
 // ---- Main ----------------------------------------------------------------------------------
 
-	main ( int argc, char * argv [] )
+	int main ( int argc, char * argv [] )
     {
         // Make sure a filename was passed
 
