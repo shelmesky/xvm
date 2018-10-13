@@ -1976,10 +1976,12 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
 
     void CopyValue ( Value * pDest, Value Source )
     {
+        /*
         // If the destination already contains a string, make sure to free it first
 
         if ( pDest->iType == OP_TYPE_STRING )
             free ( pDest->pstrStringLiteral );
+        */
 
         // Copy the object
 
