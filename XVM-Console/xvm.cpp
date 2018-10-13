@@ -2568,6 +2568,7 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
         // Push the return address, which is the current instruction
 
         Value ReturnAddr;
+        ReturnAddr.iType = 0;
         ReturnAddr.iInstrIndex = g_Scripts [ iThreadIndex ].InstrStream.iCurrInstr;
         Push ( iThreadIndex, ReturnAddr );
 
