@@ -981,12 +981,14 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
 
         PushFrame ( iThreadIndex, g_Scripts [ iThreadIndex ].iGlobalDataSize );
 
-        // If _Main () is present, push its stack frame (plus one extra stack element to
-        // compensate for the function index that usually sits on top of stack frames and
-        // causes indices to start from -2)
+        // PUSH string value to stack as parameter for _Main function
 
         XS_PassStringParam(iThreadIndex, (char *)"This is Action");
         XS_PassStringParam(iThreadIndex, (char *)"This is Address");
+
+        // If _Main () is present, push its stack frame (plus one extra stack element to
+        // compensate for the function index that usually sits on top of stack frames and
+        // causes indices to start from -2)
 
         PushFrame ( iThreadIndex, g_Scripts [ iThreadIndex ].FuncTable.pFuncs [ iMainFuncIndex ].iLocalDataSize + 2 );
 	}
