@@ -2469,6 +2469,7 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
 		// Use this index to read the top element
 
         Value Val;
+        Val.iType = 0;
     	CopyValue ( & Val, g_Scripts [ iThreadIndex ].Stack.pElmnts [ iTopIndex ] );
 
 		// Return the value to the caller
@@ -2580,6 +2581,7 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
         // Write the function index and old stack frame to the top of the stack
 
         Value FuncIndex;
+        FuncIndex.iType = 0;
         FuncIndex.iFuncIndex = iIndex;
         FuncIndex.iOffsetIndex = iFrameIndex;
         SetStackValue ( iThreadIndex, g_Scripts [ iThreadIndex ].Stack.iTopIndex - 1, FuncIndex );
