@@ -206,7 +206,7 @@ int kbhit(void)
         // Run the script until a key is pressed
 
         //while ( ! kbhit () )
-            XS_RunScripts ( 200 );
+            XS_RunScripts ( -1 );
 
         // Free resources and perform general cleanup
 
