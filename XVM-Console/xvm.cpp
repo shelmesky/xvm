@@ -824,8 +824,10 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
 		}
 
 		// ---- Read the function table
+		// ---- 读取函数表
 
 		// Read the function count (4 bytes)
+		// 读取4字节的函数数量
 
 		int iFuncTableSize;
 		fread ( & iFuncTableSize, 4, 1, pScriptFile );
@@ -833,44 +835,53 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
         g_Scripts [ iThreadIndex ].FuncTable.iSize = iFuncTableSize;
 
 		// Allocate the table
+		// 申请函数表内存
 
 		if ( ! ( g_Scripts [ iThreadIndex ].FuncTable.pFuncs = ( Func * ) malloc ( iFuncTableSize * sizeof ( Func ) ) ) )
 			return XS_LOAD_ERROR_OUT_OF_MEMORY;
 
 		// Read each function
+		// 读取每个函数
 
 		for ( int iCurrFuncIndex = 0; iCurrFuncIndex < iFuncTableSize; ++ iCurrFuncIndex )
 		{
 			// Read the entry point (4 bytes)
+			// 读取4字节的入口点(指令流中的索引)
 
 			int iEntryPoint;
 			fread ( & iEntryPoint, 4, 1, pScriptFile );
 
 			// Read the parameter count (1 byte)
+			// 读取1字节的参数数量
 
 			int iParamCount = 0;
 			fread ( & iParamCount, 1, 1, pScriptFile );
 
 			// Read the local data size (4 bytes)
+			// 读取4字节的局部数据大小
 
 			int iLocalDataSize;
 			fread ( & iLocalDataSize, 4, 1, pScriptFile );
 
 			// Calculate the stack size
+			// 计算栈的大小
 
 			int iStackFrameSize = iParamCount + 1 + iLocalDataSize;
 
             // Read the function name length (1 byte)
+            // 读取函数名字的长度
 
             int iFuncNameLength = 0;
             fread ( & iFuncNameLength, 1, 1, pScriptFile );
 
             // Read the function name (N bytes) and append a null-terminator
+            // 读取函数名字(不定长)并在最后附加一个null
 
             fread ( & g_Scripts [ iThreadIndex ].FuncTable.pFuncs [ iCurrFuncIndex ].pstrName, iFuncNameLength, 1, pScriptFile );
             g_Scripts [ iThreadIndex ].FuncTable.pFuncs [ iCurrFuncIndex ].pstrName [ iFuncNameLength ] = '\0';
 
 			// Write everything to the function table
+			// 将函数的所有信息写入到函数表
 
 			g_Scripts [ iThreadIndex ].FuncTable.pFuncs [ iCurrFuncIndex ].iEntryPoint = iEntryPoint;
 			g_Scripts [ iThreadIndex ].FuncTable.pFuncs [ iCurrFuncIndex ].iParamCount = iParamCount;
@@ -879,17 +890,21 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
 		}
 
 		// ---- Read the host API call table
+		// ---- 读取内置函数调用表
 
 		// Read the host API call count
+		// 读取内置函数数量
 
 		fread ( & g_Scripts [ iThreadIndex ].HostAPICallTable.iSize, 4, 1, pScriptFile );
 
 		// Allocate the table
+		// 申请内存
 
 		if ( ! ( g_Scripts [ iThreadIndex ].HostAPICallTable.ppstrCalls = ( char ** ) malloc ( g_Scripts [ iThreadIndex ].HostAPICallTable.iSize * sizeof ( char * ) ) ) )
 			return XS_LOAD_ERROR_OUT_OF_MEMORY;
 
 		// Read each host API call
+		// 读取每个内置函数调用
 
 		for ( int iCurrCallIndex = 0; iCurrCallIndex < g_Scripts [ iThreadIndex ].HostAPICallTable.iSize; ++ iCurrCallIndex )
 		{
@@ -1007,20 +1022,24 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
 	*
 	*	Resets the script. This function accepts a thread index rather than relying on the
 	*	currently active thread, because scripts can (and will) need to be reset arbitrarily.
+	*	重置脚本。此函数接收一个线程索引而不是和当前激活的线程相关，因为脚本可能会随时被重置。
 	*/
 
 	void XS_ResetScript ( int iThreadIndex )
 	{
         // Get _Main ()'s function index in case we need it
+        // 获取_Main函数的索引
 
         int iMainFuncIndex = g_Scripts [ iThreadIndex ].iMainFuncIndex;
 
 		// If the function table is present, set the entry point
+		// 如果函数表存在，设置入口点
 
 		if ( g_Scripts [ iThreadIndex ].FuncTable.pFuncs )
 		{
 			// If _Main () is present, read _Main ()'s index of the function table to get its
             // entry point
+            // 如果_Main()存在，读取_Main函数在函数表中的索引并获取它的入口点
 
 			if ( g_Scripts [ iThreadIndex ].iIsMainFuncPresent )
             {
@@ -1029,24 +1048,30 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
 		}
 
 		// Clear the stack
+		// 清除栈
+		// iTopIndex相当与ESP，iFrameIndex相当与EBP
 
 		g_Scripts [ iThreadIndex ].Stack.iTopIndex = 0;
         g_Scripts [ iThreadIndex ].Stack.iFrameIndex = 0;
 
         // Set the entire stack to null
+        // 将整个栈设置为null
 
         for ( int iCurrElmntIndex = 0; iCurrElmntIndex < g_Scripts [ iThreadIndex ].Stack.iSize; ++ iCurrElmntIndex )
             g_Scripts [ iThreadIndex ].Stack.pElmnts [ iCurrElmntIndex ].iType = OP_TYPE_NULL;
 
 		// Unpause the script
+		// 设置脚本为非暂停的状态
 
 		g_Scripts [ iThreadIndex ].iIsPaused = FALSE;
 
         // Allocate space for the globals
+        // 为全局变量在栈上申请空间
 
         PushFrame ( iThreadIndex, g_Scripts [ iThreadIndex ].iGlobalDataSize );
 
         // PUSH string value to stack as parameter for _Main function
+        // 向栈上PUSH两个字符串值，当作_Main函数的参数
 
         XS_PassStringParam(iThreadIndex, (char *)"This is Action");
         XS_PassStringParam(iThreadIndex, (char *)"This is Address");
@@ -1054,6 +1079,9 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
         // If _Main () is present, push its stack frame (plus one extra stack element to
         // compensate for the function index that usually sits on top of stack frames and
         // causes indices to start from -2)
+        // 如果_Main函数存在，将它的栈帧PUSH到栈行。
+        // 增加一个额外的栈元素，是因为普通函数调用需要PUSH一个额外的函数索引到栈上，
+        // 但是由于_Main函数并不会被其他函数调用，固需要在此加1.
 
         PushFrame ( iThreadIndex, g_Scripts [ iThreadIndex ].FuncTable.pFuncs [ iMainFuncIndex ].iLocalDataSize + 2 );
 	}
