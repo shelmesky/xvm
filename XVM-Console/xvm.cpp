@@ -596,11 +596,13 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
 		for ( int iCurrInstrIndex = 0; iCurrInstrIndex < g_Scripts [ iThreadIndex ].InstrStream.iSize; ++ iCurrInstrIndex )
 		{
 			// Read the opcode (2 bytes)
+			// 读取2自己的操作码
 
 			g_Scripts [ iThreadIndex ].InstrStream.pInstrs [ iCurrInstrIndex ].iOpcode = 0;
 			fread ( & g_Scripts [ iThreadIndex ].InstrStream.pInstrs [ iCurrInstrIndex ].iOpcode, 2, 1, pScriptFile );
 
 			// Read the operand count (1 byte)
+			// 读取1字节的操作数的数量
 
 			g_Scripts [ iThreadIndex ].InstrStream.pInstrs [ iCurrInstrIndex ].iOpCount = 0;
 			fread ( & g_Scripts [ iThreadIndex ].InstrStream.pInstrs [ iCurrInstrIndex ].iOpCount, 1, 1, pScriptFile );
@@ -608,61 +610,73 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
 			int iOpCount = g_Scripts [ iThreadIndex ].InstrStream.pInstrs [ iCurrInstrIndex ].iOpCount;
 
 			// Allocate space for the operand list in a temporary pointer
+			// 为操作数列表的指针申请空间
 
 			Value * pOpList;
 			if ( ! ( pOpList = ( Value * ) malloc ( iOpCount * sizeof ( Value ) ) ) )
 				return XS_LOAD_ERROR_OUT_OF_MEMORY;
 
 			// Read in the operand list (N bytes)
+			// 根据操作数的数量循环读取操作数(操作数的数量不定)
 
 			for ( int iCurrOpIndex = 0; iCurrOpIndex < iOpCount; ++ iCurrOpIndex )
 			{
 				// Read in the operand type (1 byte)
+				// 读取1字节的操作数类型
 
 				pOpList [ iCurrOpIndex ].iType = 0;
 				fread ( & pOpList [ iCurrOpIndex ].iType, 1, 1, pScriptFile );
 
 				// Depending on the type, read in the operand data
+				// 根据操作数的类型，读取操作数的数据
 
 				switch ( pOpList [ iCurrOpIndex ].iType )
 				{
 					// Integer literal
+					// 整型字面值
 
 					case OP_TYPE_INT:
 						fread ( & pOpList [ iCurrOpIndex ].iIntLiteral, sizeof ( int ), 1, pScriptFile );
 						break;
 
 					// Floating-point literal
+					// 浮点数字面值
 
 					case OP_TYPE_FLOAT:
 						fread ( & pOpList [ iCurrOpIndex ].fFloatLiteral, sizeof ( float ), 1, pScriptFile );
 						break;
 
 					// String index
+					// 字符串索引
 
 					case OP_TYPE_STRING:
 
 						// Since there's no field in the Value structure for string table
 						// indices, read the index into the integer literal field and set
 						// its type to string index
+						// 由于在Value结构中没有字段指示字符串在字符串表中的索引值，
+						// 所以将索引读取到整型的字面值中，并设置Value的类型为字符串。
 
 						fread ( & pOpList [ iCurrOpIndex ].iIntLiteral, sizeof ( int ), 1, pScriptFile );
 						pOpList [ iCurrOpIndex ].iType = OP_TYPE_STRING;
 						break;
 
 					// Instruction index
+					// 指令索引
 
 					case OP_TYPE_INSTR_INDEX:
 						fread ( & pOpList [ iCurrOpIndex ].iInstrIndex, sizeof ( int ), 1, pScriptFile );
 						break;
 
 					// Absolute stack index
+					// 栈绝对索引
 
 					case OP_TYPE_ABS_STACK_INDEX:
 						fread ( & pOpList [ iCurrOpIndex ].iStackIndex, sizeof ( int ), 1, pScriptFile );
 						break;
 
 					// Relative stack index
+					// 栈相对索引
 
 					case OP_TYPE_REL_STACK_INDEX:
 						fread ( & pOpList [ iCurrOpIndex ].iStackIndex, sizeof ( int ), 1, pScriptFile );
@@ -670,18 +684,21 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
 						break;
 
 					// Function index
+					// 函数索引
 
 					case OP_TYPE_FUNC_INDEX:
 						fread ( & pOpList [ iCurrOpIndex ].iFuncIndex, sizeof ( int ), 1, pScriptFile );
 						break;
 
 					// Host API call index
+					// 内置函数索引
 
 					case OP_TYPE_HOST_API_CALL_INDEX:
 						fread ( & pOpList [ iCurrOpIndex ].iHostAPICallIndex, sizeof ( int ), 1, pScriptFile );
 						break;
 
 					// Register
+					// 寄存器
 
 					case OP_TYPE_REG:
 						fread ( & pOpList [ iCurrOpIndex ].iReg, sizeof ( int ), 1, pScriptFile );
@@ -690,86 +707,104 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
 			}
 
 			// Assign the operand list pointer to the instruction stream
+			// 在循环中将操作数列表的指针赋值给指令流列表中当前指令的操作数列表
 
 			g_Scripts [ iThreadIndex ].InstrStream.pInstrs [ iCurrInstrIndex ].pOpList = pOpList;
 		}
 
 		// ---- Read the string table
+		// ---- 读取字符串表
 
 		// Read the table size (4 bytes)
+		// 读取4字节表的大小
 
 		int iStringTableSize;
 		fread ( & iStringTableSize, 4, 1, pScriptFile );
 
 		// If the string table exists, read it
+		// 如果存在字符串表，就读取它
 
 		if ( iStringTableSize )
 		{
 			// Allocate a string table of this size
+			// 根据表的大小申请内存
 
 			char ** ppstrStringTable;
 			if ( ! ( ppstrStringTable = ( char ** ) malloc ( iStringTableSize * sizeof ( char * ) ) ) )
 				return XS_LOAD_ERROR_OUT_OF_MEMORY;
 
 			// Read in each string
+			// 循环读取每个字符串
 
 			for ( int iCurrStringIndex = 0; iCurrStringIndex < iStringTableSize; ++ iCurrStringIndex )
 			{
 				// Read in the string size (4 bytes)
+				// 读取每个字符串的大小
 
 				int iStringSize;
 				fread ( & iStringSize, 4, 1, pScriptFile );
 
 				// Allocate space for the string plus a null terminator
+				// 为null结尾的字符串申请内存空间
 
 				char * pstrCurrString;
 				if ( ! ( pstrCurrString = ( char * ) malloc ( iStringSize + 1 ) ) )
 					return XS_LOAD_ERROR_OUT_OF_MEMORY;
 
 				// Read in the string data (N bytes) and append the null terminator
+				//读取字符串数据(N字节)并且在最后附件一个null结尾
 
 				fread ( pstrCurrString, iStringSize, 1, pScriptFile );
 				pstrCurrString [ iStringSize ] = '\0';
 
 				// Assign the string pointer to the string table
+				// 将字符串指针赋值给字符串表
 
 				ppstrStringTable [ iCurrStringIndex ] = pstrCurrString;
 			}
 
 			// Run through each operand in the instruction stream and assign copies of string
 			// operand's corresponding string literals
+			// 循环读取指令流中的每个指令的操作数，如发现操作数是字符串就将字符串表中的字符串内容拷贝给操作数
 
 			for ( int iCurrInstrIndex = 0; iCurrInstrIndex < g_Scripts [ iThreadIndex ].InstrStream.iSize; ++ iCurrInstrIndex )
 			{
 				// Get the instruction's operand count and a copy of it's operand list
+				// 获取指令的操作数的数量和操作数列表的拷贝
 
 				int iOpCount = g_Scripts [ iThreadIndex ].InstrStream.pInstrs [ iCurrInstrIndex ].iOpCount;
 				Value * pOpList = g_Scripts [ iThreadIndex ].InstrStream.pInstrs [ iCurrInstrIndex ].pOpList;
 
 				// Loop through each operand
+				// 循环每个操作数
 
 				for ( int iCurrOpIndex = 0; iCurrOpIndex < iOpCount; ++ iCurrOpIndex )
 				{
 					// If the operand is a string index, make a local copy of it's corresponding
 					// string in the table
+					// 如果操作数是字符串索引，就将字符串表中的内容拷贝到操作数的Value结构中
 
 					if ( pOpList [ iCurrOpIndex ].iType == OP_TYPE_STRING )
 					{
 						// Get the string index from the operand's integer literal field
+						// 从操作数的整形字面值字段中获取字符串索引
 
 						int iStringIndex = pOpList [ iCurrOpIndex ].iIntLiteral;
 
 						// Allocate a new string to hold a copy of the one in the table
+						// 申请一个新的字符串用来保存字符串表中的拷贝
 
 						char * pstrStringCopy;
 						if ( ! ( pstrStringCopy = ( char * ) malloc ( strlen ( ppstrStringTable [ iStringIndex ] ) + 1 ) ) )
 							return XS_LOAD_ERROR_OUT_OF_MEMORY;
 
 						// Make a copy of the string
+						// 拷贝字符串
 
 						strcpy ( pstrStringCopy, ppstrStringTable [ iStringIndex ] );
 
 						// Save the string pointer in the operand list
+						// 将字符串指针保存在操作数列表中
 
 						pOpList [ iCurrOpIndex ].pstrStringLiteral = pstrStringCopy;
 					}
@@ -777,11 +812,13 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
 			}
 
 			// ---- Free the original strings
+			// ---- 释放在字符串表中的源字符串
 
 			for ( int iCurrStringIndex = 0; iCurrStringIndex < iStringTableSize; ++ iCurrStringIndex )
 				free ( ppstrStringTable [ iCurrStringIndex ] );
 
 			// ---- Free the string table itself
+			// ---- 释放字符串表
 
 			free ( ppstrStringTable );
 		}
