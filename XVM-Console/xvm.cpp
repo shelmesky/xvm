@@ -460,6 +460,7 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
         // ---- Read the header
 
         // Create a buffer to hold the file's ID string (4 bytes + 1 null terminator = 5)
+        // 创建一个缓冲区读取文件的ID字符串(5字节)
 
 		char * pstrIDString;
         if ( ! ( pstrIDString = ( char * ) malloc ( 5 ) ) )
@@ -472,15 +473,18 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
 
         // Compare the data read from the file to the ID string and exit on an error if they don't
         // match
+        // 将文件中读取到的ID字符串和预先定义的对比，如果不匹配则退出函数
 
         if ( strcmp ( pstrIDString, XSE_ID_STRING ) != 0 )
             return XS_LOAD_ERROR_INVALID_XSE;
 
         // Free the buffer
+        // 释放ID字符串缓冲区
 
         free ( pstrIDString );
 
 		// Read the script version (2 bytes total)
+		// 读取脚本的版本
 
 		int iMajorVersion = 0,
 			iMinorVersion = 0;
@@ -489,47 +493,58 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
 		fread ( & iMinorVersion, 1, 1, pScriptFile );
 
 		// Validate the version, since this prototype only supports version 0.8 scripts
+		// 验证版本，因为这个原型只支持0.8版本
 
 		if ( iMajorVersion != 0 || iMinorVersion != 8 )
 			return XS_LOAD_ERROR_UNSUPPORTED_VERS;
 
 		// Read the stack size (4 bytes)
+		// 读取栈的大小
 
 		fread ( & g_Scripts [ iThreadIndex ].Stack.iSize, 4, 1, pScriptFile );
 
 		// Check for a default stack size request
+		// 如果从文件中读取到的栈大小为0,则设置虚拟机的栈大小为默认值(1024)
 
 		if ( g_Scripts [ iThreadIndex ].Stack.iSize == 0 )
 			g_Scripts [ iThreadIndex ].Stack.iSize = DEF_STACK_SIZE;
 
 		// Allocate the runtime stack
+		// 分配运行时栈
 
+		// 将栈初始化为1024个Value对象
         int iStackSize = g_Scripts [ iThreadIndex ].Stack.iSize;
 		if ( ! ( g_Scripts [ iThreadIndex ].Stack.pElmnts = ( Value * ) malloc ( iStackSize * sizeof ( Value ) ) ) )
 			return XS_LOAD_ERROR_OUT_OF_MEMORY;
 
         // Read the global data size (4 bytes)
+        // 读取全局数据大小(4字节)
 
         fread ( & g_Scripts [ iThreadIndex ].iGlobalDataSize, 4, 1, pScriptFile );
 
 		// Check for presence of _Main () (1 byte)
+		// 读取是否定义_Main函数
 
 		fread ( & g_Scripts [ iThreadIndex ].iIsMainFuncPresent, 1, 1, pScriptFile );
 
         // Read _Main ()'s function index (4 bytes)
+        // 读取_Main函数的索引值(在函数表中的索引)
 
         fread ( & g_Scripts [ iThreadIndex ].iMainFuncIndex, 4, 1, pScriptFile );
 
         // Read the priority type (1 byte)
+        // 读取优先级类型
 
         int iPriorityType = 0;
         fread ( & iPriorityType, 1, 1, pScriptFile );
 
         // Read the user-defined priority (4 bytes)
+        // 读取用户定义的优先级
 
         fread ( & g_Scripts [ iThreadIndex ].iTimesliceDur, 4, 1, pScriptFile );
 
         // Override the script-specified priority if necessary
+        // 如果有必要覆盖脚本定义的优先级
 
         if ( iThreadTimeslice != XS_THREAD_PRIORITY_USER )      
             iPriorityType = iThreadTimeslice;
@@ -553,17 +568,30 @@ return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);}
         }
 
 		// ---- Read the instruction stream
+		// ---- 读取指令流
 
 		// Read the instruction count (4 bytes)
+		// 读取指令的数量
 
 		fread ( & g_Scripts [ iThreadIndex ].InstrStream.iSize, 4, 1, pScriptFile );
 
 		// Allocate the stream
+		// 为指令流分配内存
+		// 指令流中的每个指令为Instr类型
+		/*
+		 * typedef struct _Instr                           // An instruction
+        {
+            int iOpcode;                                // The opcode: 操作符
+            int iOpCount;                               // The number of operands: 操作数的数量
+            Value * pOpList;                            // The operand list: 操作数列表
+        }
+		 */
 
 		if ( ! ( g_Scripts [ iThreadIndex ].InstrStream.pInstrs = ( Instr * ) malloc ( g_Scripts [ iThreadIndex ].InstrStream.iSize * sizeof ( Instr ) ) ) )
 			return XS_LOAD_ERROR_OUT_OF_MEMORY;
 
 		// Read the instruction data
+		// 读取指令数据
 
 		for ( int iCurrInstrIndex = 0; iCurrInstrIndex < g_Scripts [ iThreadIndex ].InstrStream.iSize; ++ iCurrInstrIndex )
 		{
